@@ -1,0 +1,76 @@
+1. High availability of Namenode
+
+  *It was a single point of failur in 1.x. 
+  *Each cluster had a single NameNode
+  *if the machine or process is not in available, the cluster as a whole it would be unavailable until the NameNode 
+    restarted or brought up on a machine seperately
+
+ The Importance of HDFS cluster:
+ 
+  *This allows a fast failover to a new NameNode in the case that a machine crashes, or a graceful administrator-initiated failover for the purpose of planned maintenance.
+  *The Active NameNode is responsible for all client operations in the cluster, while the Standby is simply acting as a slave, maintaining enough state to provide a fast failover if necessary.
+  *In a typical HA cluster, two separate machines are configured as NameNodes. At any point in time, exactly one of the NameNodes is in an Active state, and the other is in a Standby state. 
+  *In order for the Standby node to keep its state synchronized with the Active node, the current implementation requires that the two nodes both have access to a directory on a shared storage device (eg an NFS mount from a NAS). 
+  *Planned maintenance events such as software or hardware upgrades on the NameNode machine would result in windows of cluster downtime.
+  *In the case of an unplanned event such as a machine crash, the cluster would be unavailable until an operator restarted the NameNode.
+  *The HDFS High Availability feature addresses the above problems by providing the option of running two redundant NameNodes in the same cluster in an Active/Passive configuration with a hot standby. 
+2.  what is check pointing 
+   
+   It is an essential part which is belongs to maintaining and persisting filesystem metadata part in HDFS it is called checkpointing.It is also a process of reconciling fsimage
+   and used to produce  a new version of fsimage. 
+   HDFS metadata consisting of two parts: 
+   *The base filesystem table (stored in a file called fsimage) 
+   *The edit log which lists used to made modification in the base table (stored in a file called edits). 
+   * StandbyNameNode takes periodic checkpoints of the active NameNode.
+   *Checkpointing is carried out by the StandBy NameNode.
+   Need of checkpointing:
+   A  edit ranges  will be like from 10s to 100s of bytes.
+   the large edit logs will creste a couple of problems. In extreme cases, it can fill up all the available disk
+   capacity on a node, but more subtly, a large edit log can substantially delay NameNode startup as the NameNode reapplies all the edits. This is where checkpointing comes in.
+   Advantages:
+   There are two benefits: 
+   *Recent version of fsimage,
+   *Truncated edit log.
+                    
+3. HDFS federation
+
+There are multiple NameNodes,  
+  *By providing the option of running two redundant NameNodes in the same cluster in an Active/Passive configuration with a hot standby the HDFS High Availability feature addresses the problems
+  *By the clear separation of namespace and storagets Federation improves the existing HDFS architecture and also enabling generic block storage layer.
+  *It also provide support for multiple namespaces in the cluster to improve scalability and
+isolation. 
+  *Federation also opens up the architecture, make the applicability of HDFS cluster to expand new implementations and use cases.
+The list of sub-directories managed by a NameNode is called a namespace volume.
+Blocks for files belonging to a namespace is called a block pool.
+HDFS has two main layers:
+1) It supports file system operations such as creation, modification, deletion and listing of files and directories.Namespace manages
+directories, files and blocks.
+2) Block Storagehas two parts:
+ -It supports block-related operations like deletion, modification,creation and used for getting the blocks location .
+  Block Management maintains the membership of datanodes in the cluster
+ -Physical Storage stores the blocks and provides read/write and used to access it
+
+ADVANATAGES -:
+*Simplicity of Design
+*Isolation 
+*It proivides scalability
+
+
+
+4.  configuration files that are to be edited for sure while installing a hadoop cluster.
+
+The four files that  are need to be configured explicitly in  single node hadoop cluster are:
+1) HDFS-site.xml
+2) YARN-site.xml
+3) Core-site.xml
+4) xml             
+         
+1) HDFS-site.xml:
+   Some of the important properties are:
+   
+  * Co Manages ssl client authentication
+  * Controls Network interfacenfigure port access
+  *Changes file permission
+
+2)YARN-site.xml:
+  YARN has ResourceManager settings which effects resource allocation with node manager and application manager.
